@@ -12,3 +12,8 @@ bugu-lang based buguOS
 3. based on buguOS filesystem implement, k210 bin code save fs as a block
    1. when construct fs, save bin code
    2. add inode and other meta data
+
+### buguOS
+
+1. parser elf
+2. proxy print
