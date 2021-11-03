@@ -11,5 +11,5 @@ fn setp1() {
 }
 
 fn main() {
-    println!("Hello, world!");
+    println!("{}", setp1::TermParser::new().parse("22").unwrap());
 }
