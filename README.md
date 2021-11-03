@@ -2,6 +2,8 @@
 
 ## bugu-lang
 
+[![Rust](https://github.com/buhe/bugu-lang/actions/workflows/rust.yml/badge.svg)](https://github.com/buhe/bugu-lang/actions/workflows/rust.yml)
+
 bugu-lang based buguOS
 
 ### step
