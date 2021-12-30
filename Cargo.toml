@@ -8,5 +8,5 @@ license = " GPL-3.0"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-lib-rv32-asm = "0.2.0"
+lib-rv32-asm = {git="https://github.com/buguOS/lib-rv32"}
 byteorder = "1"
