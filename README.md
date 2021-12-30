@@ -18,6 +18,6 @@ bugu-lang based buguOS
 2. proxy print
 
 ### Todo
-[ ] gen elf
-[ ] link obj
-[ ] mul, mod, div support
+- [ ] gen elf
+- [ ] link obj
+- [ ] mul, mod, div support
