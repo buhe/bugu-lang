@@ -7,13 +7,16 @@
 bugu-lang based buguOS
 
 ### step
-2. bugu-lang -> risc-v asm
-3. risc-v asm -> k210 bin code
-3. based on buguOS filesystem implement, k210 bin code save fs as a block
-   1. when construct fs, save bin code
-   2. add inode and other meta data
+1. bugu-lang -> risc-v asm
+2. risc-v asm -> risc-v bin code
+3. risc-v bin code -> elf 
+4. based on buguOS filesystem implement(fat32), risc-v bin code save fs as a block
 
 ### buguOS
 
 1. parser elf
 2. proxy print
+
+### Todo
+[ ] gen elf
+[ ] link obj
