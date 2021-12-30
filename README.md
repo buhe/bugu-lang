@@ -20,3 +20,4 @@ bugu-lang based buguOS
 ### Todo
 [ ] gen elf
 [ ] link obj
+[ ] mul, mod, div support
