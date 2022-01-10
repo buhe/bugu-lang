@@ -2,3 +2,6 @@ target/
 Cargo.lock
 example
 example2
+.vscode/configurationCache.log
+.vscode/dryrun.log
+.vscode/targets.log
