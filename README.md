@@ -19,6 +19,7 @@ bugu-lang based buguOS
 
 ### Todo
 - [ ] link buguOS user lib
+- [ ] env gcc bin
 
 ### test
 
