@@ -15,12 +15,14 @@ fn main() -> std::io::Result<()> {
     println!("asm:\n {}", &string);
     let asm_file = format!("{}.S", target);
     fs::write(&asm_file, &string)?;
-    Command::new("riscv-gcc/bin/riscv64-unknown-elf-gcc")
+    let mut r = Command::new("riscv-gcc/bin/riscv64-unknown-elf-gcc")
         .arg("-march=rv32im")
         .arg("-mabi=ilp32")
-        .arg(asm_file)
+        .arg(&asm_file)
         .arg("-o")
         .arg(target)
         .spawn()?;
+    r.wait()?;
+    fs::remove_file(&asm_file)?;
     Ok(())
 }
