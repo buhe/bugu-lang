@@ -18,6 +18,17 @@ bugu-lang based buguOS
 2. proxy print
 
 ### Todo
-- [ ] gen elf
-- [ ] link obj
-- [ ] mul, mod, div support
+- [ ] link buguOS user lib
+
+### test
+
+```shell
+ cargo install buguc
+ # add riscv gcc toolchain
+ git clone https://github.com/buhe/bugu-lang.git
+ cd bugu-lang
+ buguc some_src.bugu
+ spike --isa=RV32G env/pk some_src
+ # result
+ echo $?
+```
