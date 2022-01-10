@@ -1,8 +1,7 @@
-use std::{fs, io::BufWriter};
+use std::{fs, io::{BufWriter}, process::Command};
 
 use buguc::run;
-use lib_rv32_asm::assemble_program;
-use byteorder::{LittleEndian, WriteBytesExt};
+
 
 
 fn main() -> std::io::Result<()> {
@@ -14,10 +13,14 @@ fn main() -> std::io::Result<()> {
     run(src, &mut buf)?;
     let string = String::from_utf8(buf.into_inner()?).unwrap();
     println!("asm:\n {}", &string);
-    let mut bin: Vec<u8> = Vec::new();
-    for n in assemble_program(&string).unwrap() {
-        let _ = bin.write_u32::<LittleEndian>(n);
-    }
-    fs::write(target, bin)?;
+    let asm_file = format!("{}.S", target);
+    fs::write(&asm_file, &string)?;
+    Command::new("riscv-gcc/bin/riscv64-unknown-elf-gcc")
+        .arg("-march=rv32im")
+        .arg("-mabi=ilp32")
+        .arg(asm_file)
+        .arg("-o")
+        .arg(target)
+        .spawn()?;
     Ok(())
 }

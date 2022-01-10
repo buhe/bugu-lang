@@ -4,7 +4,7 @@ use std::io::{Result, Write};
 pub fn write_asm(p: &IrProg, bl: &mut BranchLabel ,table: &mut SymTab, w: &mut impl Write) -> Result<()> {
   let f = &p.func;
   let mut r = Regeister::init();
-  // writeln!(w, ".global {}", f.name)?;
+  writeln!(w, ".global {}", f.name)?;
   writeln!(w, "{}:", f.name)?;
   for s in &f.stmts {
     match s {
