@@ -26,7 +26,7 @@ bugu-lang based buguOS
 ```shell
  cargo install buguc
  # add riscv gcc toolchain
- git clone https://github.com/buhe/bugu-lang.git
+ wget https://drive.google.com/file/d/16GCcvLfSQ4BD5lyCFD-D5Qq5c6GQN30l/view?usp=sharing
  cd bugu-lang
  buguc some_src.bugu
  spike --isa=RV32G env/pk some_src
