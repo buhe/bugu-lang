@@ -32,6 +32,14 @@ pub enum TokenType {
     Else,             // else
     Colon,          // :
     Ques,           // ?
+    For,
+    While,
+    Continue,
+    Break,
+    Eof,
+    Comma,          // ,
+    LeftBrack,      // [
+    RightBrack,     // ]
 }
 
 // Character Kind
@@ -67,6 +75,9 @@ impl TokenType {
             '|' => Some(Or),
             ':' => Some(Colon),
             '?' => Some(Ques),
+            ',' => Some(Comma),
+            '[' => Some(LeftBrack),
+            ']' => Some(RightBrack),
             _ => None,
         }
     }
@@ -112,6 +123,10 @@ fn keyword_map() -> HashMap<String, TokenType> {
     map.insert("return".into(), TokenType::Return);
     map.insert("if".into(), TokenType::If);
     map.insert("else".into(), TokenType::Else);
+    map.insert("for".into(), TokenType::For);
+    map.insert("while".into(), TokenType::While);
+    map.insert("continue".into(), TokenType::Continue);
+    map.insert("break".into(), TokenType::Break);
     map
 }
 
@@ -140,12 +155,6 @@ impl Token {
 }
 
 #[derive(Debug, Clone)]
-// struct Symbol {
-//     name: &'static str,
-//     ty: TokenType,
-// }
-
-// Tokenizer
 struct Tokenizer {
     p: Rc<Vec<char>>, //input
     pos: usize,
@@ -160,20 +169,6 @@ impl Tokenizer {
             tokens: vec![],
         }
     }
-
-    // fn read_file(filename: &str) -> String {
-    //     let mut input = String::new();
-    //     let mut fp = io::stdin();
-    //     if filename != &"-".to_string() {
-    //         let mut fp = File::open(filename).expect("file not found");
-    //         fp.read_to_string(&mut input)
-    //             .expect("something went wrong reading the file");
-    //         return input;
-    //     }
-    //     fp.read_to_string(&mut input)
-    //         .expect("something went wrong reading the file");
-    //     input
-    // }
 
     fn new_token(&self, ty: TokenType) -> Token {
         Token::new(ty)
@@ -210,11 +205,12 @@ impl Tokenizer {
                         self.tokens.push(t);
                         continue;
                     }
-                    self.bad_position("Unknwon character type.")
+                    panic!("Unknwon character type. {}", c)
                 }
                 CharacterType::Unknown(_) => self.bad_position("Unknwon character type."),
             }
         }
+        self.tokens.push(self.new_token(TokenType::Eof));
         self.tokens.clone()
     }
 

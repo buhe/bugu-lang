@@ -1,3 +1,5 @@
+use std::collections::VecDeque;
+
 use crate::ast::*;
 use crate::lexer::{Token, TokenType};
 use crate::symbols::{SymTab, Symbol};
@@ -56,9 +58,16 @@ impl Parser {
       let t2 = &self.tokens[self.pos];
       if let TokenType::Equal = &t2.ty {
           self.pos += 1; // eat =
-          Expr::Assign(Box::new(id.to_string()), Box::new(self.expr()))
+          let t3 = &self.tokens[self.pos];
+          if let TokenType::Equal = &t3.ty {
+            self.pos -= 2; // rollback = and id
+            self.condition()
+          } else {
+            let scope = self.symbols.extis(&self.symbols.current_scope, id).1;
+            Expr::Assign(Box::new(scope),Box::new(id.to_string()), Box::new(self.expr()))
+          }
       } else {
-          self.pos -= 1;
+          self.pos -= 1; // rollback id
           self.condition()
       }
     } else {
@@ -288,12 +297,55 @@ impl Parser {
         r
       },
       TokenType::Ident(id) => {
-        // let s = self.symbols.get(&id.to_string());
-        Unary::Identifier(Box::new(id.clone()))
+        let t = &self.tokens[self.pos];
+        let name = id.clone();
+        match &t.ty {
+            TokenType::LeftParen => {
+              self.expect(TokenType::LeftParen);
+              let params = self.expression_list();
+              self.expect(TokenType::RightParen);
+              let func = self.symbols.get_fn(&name);
+              Unary::Call(Call{
+                name: func.name.clone(),
+                params,
+              })
+            }
+            TokenType::LeftBrack => {
+              // todo
+              // support
+              let scope = self.symbols.extis(&self.symbols.current_scope, &id).1;
+              let mut e_list = VecDeque::new();
+              loop {
+                  let t = &self.tokens[self.pos];
+                  match &t.ty {
+                      TokenType::LeftBrack => {
+                        self.expect(TokenType::LeftBrack);
+                        let e = self.expr();
+                        match e {
+                            Expr::Unary(Unary::Int(num)) => {
+                              e_list.push_back(num);
+                            }
+                            _ => self.bad_token("index only support number.")
+                        }
+                        
+                        self.expect(TokenType::RightBrack);
+                      }
+                      _ => break
+                  }
+              }
+              Unary::Index(Box::new(scope), IndexExpr{name: name,index: e_list})
+            }
+            _ => {
+              let scope = self.symbols.extis(&self.symbols.current_scope, &id).1;
+              Unary::Identifier(Box::new(scope),Box::new(name))
+            }
+        }
       }
       _ => self.bad_token(&format!("expected , actual {:?}", t.ty)),
     }
   }
+
+
 
   fn _type(&mut self) -> Type{
       self.expect(TokenType::Int);
@@ -328,10 +380,33 @@ impl Parser {
   fn decl(&mut self) -> Decl { // decl is special assign then add assign ir.
     let t = self._type();
     let name = self.identifier();
+    let indexes = self.index();
     let expr = self.decl_expr();
-    // self.expect(TokenType::Semicolon);
-    self.symbols.put(name.clone(), Symbol::new(name.clone()));  
-    Decl { t, name, expr }
+    let scope = self.symbols.current_scope.clone();
+    self.symbols.put(name.clone(), Symbol::new(name.clone(), indexes.clone()));  
+    Decl { t, name, indexes, expr, scope }
+  }
+
+  fn index(&mut self) -> VecDeque<i32> {
+    let mut indexes = VecDeque::new();
+    loop {
+        let t = &self.tokens[self.pos];
+        match t.ty {
+          TokenType::LeftBrack => {
+            self.expect(TokenType::LeftBrack);
+            let t = &self.tokens[self.pos];
+            if let TokenType::Num(n) = t.ty {
+              indexes.push_back(n);//first high
+              self.pos += 1; // eat index
+            } else {
+                self.bad_token("expected int")
+            }
+            self.expect(TokenType::RightBrack);
+          }
+          _ => break
+        }
+    }
+    indexes
   }
   
   fn stmt(&mut self) -> Stmt {
@@ -361,6 +436,64 @@ impl Parser {
         } 
         Stmt::If(condition, Box::new(then_stmt), else_stmt)
       }
+      TokenType::For => {
+        self.expect(TokenType::For);
+        self.expect(TokenType::LeftParen);
+        let mut init = None;
+        let t = &self.tokens[self.pos];
+        match t.ty {
+            TokenType::Semicolon => {
+
+            }
+            _ => {
+              init = Some(self.expr());
+            }
+        }
+        self.expect(TokenType::Semicolon);
+        let mut cond = None;
+        let t = &self.tokens[self.pos];
+        match t.ty {
+            TokenType::Semicolon => {
+
+            }
+            _ => {
+              cond = Some(self.expr());
+            }
+        }
+        self.expect(TokenType::Semicolon);
+        let mut update = None;
+        let t = &self.tokens[self.pos];
+        match t.ty {
+            TokenType::Semicolon => {
+
+            }
+            _ => {
+              update = Some(self.expr());
+            }
+        }
+        self.expect(TokenType::RightParen);
+        let stmt = self.stmt();
+        Stmt::For(init, cond, update, Box::new(stmt))
+      }
+      TokenType::While => {
+        self.expect(TokenType::While);
+        self.expect(TokenType::LeftParen);
+        let condition = self.expr();
+        self.expect(TokenType::RightParen);
+        let stmt = self.stmt();
+        Stmt::While(condition, Box::new(stmt))
+      }
+      TokenType::Continue => {
+        self.expect(TokenType::Continue);
+        Stmt::Continue
+      }
+      TokenType::Break => {
+        self.expect(TokenType::Break);
+        Stmt::Break
+      }
+      TokenType::LeftBrace => {
+        Stmt::Block(self.compound_statement())
+      }
       _ => {
         let e = self.expr(); 
         self.expect(TokenType::Semicolon);
@@ -369,45 +502,140 @@ impl Parser {
     }
   }
 
-  fn block_item(&mut self) -> Option<Block> {
+  fn block_item(&mut self) -> Option<BlockItem> {
     let t = &self.tokens[self.pos];
     match t.ty {
-      TokenType::Int => Some(Block::Decl(self.decl())),
+      TokenType::Int => Some(BlockItem::Decl(self.decl())),
       TokenType::RightBrace => None, // when } finish.
-      _ => Some(Block::Stmt(self.stmt()))
+      _ => Some(BlockItem::Stmt(self.stmt()))
     }
   }
 
+  fn parameter_list(&mut self) -> Vec<Param> {
+    let mut params = vec![];
+    let t = &self.tokens[self.pos];
+    match t.ty {
+      TokenType::RightParen => {}
+      _ => {
+        let _t = self._type();
+        let id = self.identifier();
+        let indexes = self.index();
+        let param = Param::new(self.symbols.current_scope.clone(),id);
+        self.symbols.put(param.name.clone(), Symbol::new(param.name.clone(), indexes));
+        params.push(param);
+        
+        loop {
+            let t = &self.tokens[self.pos];
+            match t.ty {
+                TokenType::Comma => {
+                  self.pos += 1; //eat ,
+                  let _t = self._type();
+                  let id = self.identifier();
+                  let indexes = self.index();
+                  let param = Param::new(self.symbols.current_scope.clone(),id);
+                  self.symbols.put(param.name.clone(), Symbol::new(param.name.clone(), indexes));
+                  params.push(param);
+                }
+                _ => break,
+            }
+        }
+      }
+    }
+    params
+  }
 
-  fn func(&mut self) -> Func {
-    self._type();
-    // self.expect(TokenType::Int);
-    let ident = self.identifier();
-    // self.expect(TokenType::Ident("main".to_string()));
-    self.expect(TokenType::LeftParen);
-    self.expect(TokenType::RightParen);
+  fn expression_list(&mut self) -> Vec<Expr> {
+    let mut exprs = vec![];
+    let t = &self.tokens[self.pos];
+    match t.ty {
+      TokenType::RightParen => {}
+      _ => {
+        let expr = self.expr();
+        exprs.push(expr);
+        loop {
+            let t = &self.tokens[self.pos];
+            match t.ty {
+                TokenType::Comma => {
+                  self.pos += 1; //eat ,
+                  exprs.push(self.expr());
+                }
+                _ => break,
+            }
+        }
+      }
+    }
+    exprs
+  }
+
+  fn compound_statement(&mut self) -> Vec<BlockItem> {
     self.expect(TokenType::LeftBrace);
-    let mut body = vec![];
+    
+    let mut block_items = vec![];
     loop { // branch mutli stmt
         let stmt = self.block_item();
         match stmt {
-            Some(s) => body.push(s),
+            Some(s) => block_items.push(s),
             None => break
         }
     }
-    
     self.expect(TokenType::RightBrace);
-
-    Func {
-      name: ident,
-      stmt: body,
-    }
+    
+    block_items
   }
+
+  fn func(&mut self) -> Func {
+        self._type();
+        // self.expect(TokenType::Int);
+        let ident = self.identifier();
+        self.symbols.put(ident.clone(), Symbol::new_fn(ident.clone()));
+        self.symbols.enter_scope();
+        // self.expect(TokenType::Ident("main".to_string()));
+        self.expect(TokenType::LeftParen);
+        let params = self.parameter_list();
+        self.expect(TokenType::RightParen);
+        let body = self.compound_statement();
+        self.symbols.leave_scope();
+        Func {
+          name: ident.clone(),
+          stmt: body,
+          params,
+        }
+    }
+  
 
 
   fn prog(&mut self) {
-    // Function
-    self.prog = Some(Prog { func: self.func() });
-    //   self.prog
+    let mut funcs: Vec<Func> = vec![];
+    let mut global_vars: Vec<Decl> = vec![];
+    loop {
+          let t = &self.tokens[self.pos];
+          match t.ty {
+            TokenType::Eof => break,
+            TokenType::Int => { //type
+              self._type(); // eat type
+              let t = &self.tokens[self.pos];
+              match &t.ty {
+                  // expect id token
+                  TokenType::Ident(_id) => {
+                    self.pos += 1; // eat id
+                  }
+                  _ => self.bad_token("ident expected"),
+              }
+              let t = &self.tokens[self.pos];
+              match t.ty {
+                TokenType::LeftParen => {
+                  self.pos -= 2;
+                  funcs.push(self.func());
+                }
+                _ => {
+                  self.pos -= 2;
+                  global_vars.push(self.decl());
+                }
+              }
+            }
+            _ => self.bad_token("no func or global var")
+          }
+    }
+    self.prog = Some(Prog { funcs, global_vars });
   }
 }
