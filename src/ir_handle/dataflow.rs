@@ -7,24 +7,36 @@ pub fn dataflow(p: &IrProg, table: &mut SymTab) -> IrProg {
     for f in &p.funcs {
         let mut basic_blocks: Vec<BasicBlock> = vec![];
         let mut first = BasicBlock::new();
-        let mut has_c = false;
+        let mut has_valid_command = false;
         for s in &f.stmts {
+            // first.stmts.push(s);
             match s {
-                IrStmt::Jmp(_) | IrStmt::Beq(_,_) | IrStmt::Ret(_) | IrStmt::Label(_)=> {
-                    if has_c {
+                IrStmt::Label(_)=> {
+                    if has_valid_command && !first.stmts.is_empty() {
+                        basic_blocks.push(first);
+                        first = BasicBlock::new();
+                        
+                    }
+                    first.stmts.push(s);
+                }
+                IrStmt::Jmp(_) | IrStmt::Beq(_,_) | IrStmt::Ret(_) => {
+                    first.stmts.push(s);
+                    if has_valid_command && !first.stmts.is_empty() {
                         basic_blocks.push(first);
                         first = BasicBlock::new();
                         
                     }
                 }
                 IrStmt::Ref(_,_) => {
-                    has_c = false;
+                    first.stmts.push(s);
+                    has_valid_command = false;
                 }
                 _ => {
-                    has_c = true;
+                    first.stmts.push(s);
+                    has_valid_command = true;
                 }
             }
-            first.stmts.push(s);
+            
         }
         // last
         basic_blocks.push(first);
