@@ -26,3 +26,19 @@ fn main() -> std::io::Result<()> {
     fs::remove_file(&asm_file)?;
     Ok(())
 }
+
+    #[test]
+    fn ra_1() {
+        buguc::run("int gcd(int a, int b) {
+                                while (a != 0) {
+                                    int c;
+                                    c = b % a;
+                                    b = a;
+                                    a = 1;
+                                    a = 2;
+                                    a = c;
+                                }
+                                return b;
+                            }".to_string(), 
+        &mut std::io::stdout()).unwrap();
+    }

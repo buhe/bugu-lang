@@ -28,7 +28,7 @@ pub fn dataflow(p: &IrProg, table: &mut SymTab) -> IrProg {
         }
         // last
         basic_blocks.push(first);
-        println!("bb:\n{:?}", basic_blocks);
+        println!("{:?} bb:\n{:?}", f.name, basic_blocks);
         let mut stmts: Vec<IrStmt> = Vec::new();
         for s in &f.stmts {
          match s {
