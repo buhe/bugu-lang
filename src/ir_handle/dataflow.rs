@@ -7,40 +7,54 @@ pub fn dataflow(p: &IrProg, table: &mut SymTab) -> IrProg {
     for f in &p.funcs {
         let mut basic_blocks: Vec<BasicBlock> = vec![];
         let mut first = BasicBlock::new();
-        let mut has_valid_command = false;
         for s in &f.stmts {
-            // first.stmts.push(s);
             match s {
-                IrStmt::Label(_)=> {
-                    if has_valid_command && !first.stmts.is_empty() {
+                IrStmt::Label(label)=> {
+                    if !first.stmts.is_empty() {
                         basic_blocks.push(first);
-                        first = BasicBlock::new();
-                        
                     }
+                    first = BasicBlock::new_with_label(label.clone());
                     first.stmts.push(s);
                 }
                 IrStmt::Jmp(_) | IrStmt::Beq(_,_) | IrStmt::Ret(_) => {
                     first.stmts.push(s);
-                    if has_valid_command && !first.stmts.is_empty() {
-                        basic_blocks.push(first);
-                        first = BasicBlock::new();
-                        
-                    }
-                }
-                IrStmt::Ref(_,_) => {
-                    first.stmts.push(s);
-                    has_valid_command = false;
+                    basic_blocks.push(first);
+                    first = BasicBlock::new();
                 }
                 _ => {
                     first.stmts.push(s);
-                    has_valid_command = true;
                 }
             }
             
         }
         // last
-        basic_blocks.push(first);
+        if !first.stmts.is_empty() {
+            basic_blocks.push(first);
+        }
         println!("{:?} bb:\n{:?}", f.name, basic_blocks);
+
+        // let mut next_bb = 0;
+        // for mut bb in basic_blocks {
+        //     next_bb += 1;
+        //     let stmts = bb.stmts;
+        //     for s in stmts {
+        //         match s {
+        //             IrStmt::Jmp(label)  => {
+                        
+        //             }
+        //             IrStmt::Beq(_,label) => {
+        //                 let edge = basic_blocks.get(next_bb);
+        //                 bb.edges.push(edge.unwrap());
+        //             }
+        //             // IrStmt::Ret(_) => {
+
+        //             // }
+        //             _ => {
+        //             }
+        //         }
+        //     }
+        // }
+
         let mut stmts: Vec<IrStmt> = Vec::new();
         for s in &f.stmts {
          match s {
@@ -181,13 +195,15 @@ pub fn dataflow(p: &IrProg, table: &mut SymTab) -> IrProg {
     3. 在满足前两条的前提下含有最多的连续语句，即基本块的头尾再纳入一条语句将会违反上面两条规则。
 */
 /*
-1. 当遇到一个 Label 标记而且存在跳转语句跳转到这个行号时。
-2. 当遇到 Branch、CondBranch 或者 Return 等跳转语句时。
+1）第一条指令。
+2）跳转指令的目标指令。
+3）紧跟跳转指令之后的指令。
 */
 #[derive(Debug)]
 pub struct BasicBlock<'a> {
    pub stmts: Vec<&'a IrStmt>,
    pub edges: Vec<&'a BasicBlock<'a>>,  // from none,branch,cond branch
+   label: Option<String>,
 }
 
 impl<'a> BasicBlock<'a> {
@@ -195,6 +211,15 @@ impl<'a> BasicBlock<'a> {
         Self {
             stmts: vec![],
             edges: vec![],
+            label: None,
+        }
+    }
+
+     fn new_with_label(label: String) -> Self {
+        Self {
+            stmts: vec![],
+            edges: vec![],
+            label: Some(label),
         }
     }
 }
