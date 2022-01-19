@@ -7,3 +7,4 @@ example2
 .vscode/targets.log
 riscv-gcc/
 example.S
+example.o

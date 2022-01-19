@@ -10,3 +10,9 @@ gcc:
 
 read:
 	riscv-gcc/bin/riscv64-unknown-elf-readelf -a example
+
+obj:
+	riscv-gcc/bin/riscv64-unknown-elf-gcc -march=rv32im -mabi=ilp32 -c example.S
+
+reado:
+	riscv-gcc/bin/riscv64-unknown-elf-readelf -a example.o
