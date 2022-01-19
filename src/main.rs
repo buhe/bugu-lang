@@ -1,14 +1,26 @@
 use std::{fs, io::{BufWriter}, process::Command};
 
 use buguc::run;
+use clap::Parser;
 
+#[derive(Parser)]
+#[clap(author, version, about, long_about = None)]
+struct Cli {
+    #[clap(short, long)]
+    s: bool,
+
+    input: Option<String>,
+}
 
 
 fn main() -> std::io::Result<()> {
-    let i = std::env::args().nth(1).expect("no input");
-    let src = fs::read_to_string(&i).expect("src not existed.");
+    let cli = Cli::parse();
+    let input = &cli.input.unwrap();
+    let asm_created = cli.s;
+    // println!("name: {:?}", );
+    let src = fs::read_to_string(input).expect("src not existed.");
     let mut buf = BufWriter::new(Vec::new());
-    let target = &i.replace(".bugu", "");
+    let target = input.replace(".bugu", "");
     println!("src:\n{}", src);
     run(src, &mut buf)?;
     let string = String::from_utf8(buf.into_inner()?).unwrap();
@@ -23,7 +35,9 @@ fn main() -> std::io::Result<()> {
         .arg(target)
         .spawn()?;
     r.wait()?;
-    fs::remove_file(&asm_file)?;
+    if !asm_created {
+        fs::remove_file(&asm_file)?;
+    }
     Ok(())
 }
 

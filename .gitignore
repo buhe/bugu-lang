@@ -6,3 +6,4 @@ example2
 .vscode/dryrun.log
 .vscode/targets.log
 riscv-gcc/
+example.S
