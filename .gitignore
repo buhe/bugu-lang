@@ -8,3 +8,4 @@ example2
 riscv-gcc/
 example.S
 example.o
+example_g.o

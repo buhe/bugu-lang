@@ -12,7 +12,7 @@ read:
 	riscv-gcc/bin/riscv64-unknown-elf-readelf -a example
 
 obj:
-	riscv-gcc/bin/riscv64-unknown-elf-gcc -march=rv32im -mabi=ilp32 -c example.S
+	riscv-gcc/bin/riscv64-unknown-elf-gcc -march=rv32im -mabi=ilp32 -c example.S -o example_g.o
 
 reado:
 	riscv-gcc/bin/riscv64-unknown-elf-readelf -a example.o

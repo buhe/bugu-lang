@@ -8,6 +8,8 @@ use clap::Parser;
 struct Cli {
     #[clap(short, long)]
     s: bool,
+    #[clap(short, long)]
+    object: bool,
 
     input: Option<String>,
 }
@@ -26,15 +28,29 @@ fn main() -> std::io::Result<()> {
     let string = String::from_utf8(buf.into_inner()?).unwrap();
     println!("asm:\n {}", &string);
     let asm_file = format!("{}.S", target);
+    let object_file = format!("{}.o", target);
     fs::write(&asm_file, &string)?;
-    let mut r = Command::new("riscv-gcc/bin/riscv64-unknown-elf-gcc")
-        .arg("-march=rv32im")
-        .arg("-mabi=ilp32")
-        .arg(&asm_file)
-        .arg("-o")
-        .arg(target)
-        .spawn()?;
-    r.wait()?;
+    if cli.object {
+        let mut r = Command::new("riscv-gcc/bin/riscv64-unknown-elf-gcc")
+            .arg("-march=rv32im")
+            .arg("-mabi=ilp32")
+            .arg("-c")
+            .arg(&asm_file)
+            .arg("-o")
+            .arg(object_file)
+            .spawn()?;
+        r.wait()?;
+    } else {
+        let mut r = Command::new("riscv-gcc/bin/riscv64-unknown-elf-gcc")
+            .arg("-march=rv32im")
+            .arg("-mabi=ilp32")
+            .arg(&asm_file)
+            .arg("-o")
+            .arg(target)
+            .spawn()?;
+        r.wait()?;
+    }
+ 
     if !asm_created {
         fs::remove_file(&asm_file)?;
     }
