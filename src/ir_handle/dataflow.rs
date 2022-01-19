@@ -1,59 +1,61 @@
 
+// use std::collections::HashMap;
+
 use crate::{ir::{IrStmt, IrProg, IrFunc}, regeister::Regeister, symbols::SymTab};
 
 pub fn dataflow(p: &IrProg, table: &mut SymTab) -> IrProg {
     let mut r = Regeister::init();
     let mut funcs = vec![];
     for f in &p.funcs {
-        let mut basic_blocks: Vec<BasicBlock> = vec![];
-        let mut first = BasicBlock::new();
-        for s in &f.stmts {
-            match s {
-                IrStmt::Label(label)=> {
-                    if !first.stmts.is_empty() {
-                        basic_blocks.push(first);
-                    }
-                    first = BasicBlock::new_with_label(label.clone());
-                    first.stmts.push(s);
-                }
-                IrStmt::Jmp(_) | IrStmt::Beq(_,_) | IrStmt::Ret(_) => {
-                    first.stmts.push(s);
-                    basic_blocks.push(first);
-                    first = BasicBlock::new();
-                }
-                _ => {
-                    first.stmts.push(s);
-                }
-            }
+    //     let mut bb_by_label = HashMap::new();
+    //     let mut basic_blocks: Vec<BasicBlock> = vec![];
+    //     let mut first = BasicBlock::new();
+    //     for s in &f.stmts {
+    //         match s {
+    //             IrStmt::Label(label)=> {
+    //                 if !first.stmts.is_empty() {
+    //                     basic_blocks.push(first);
+    //                 }
+    //                 first = BasicBlock::new_with_label(label.clone());
+    //                 first.stmts.push(s);
+    //                 bb_by_label.insert(label.clone(), &first);
+    //             }
+    //             IrStmt::Jmp(_) | IrStmt::Beq(_,_) | IrStmt::Ret(_) => {
+    //                 first.stmts.push(s);
+    //                 basic_blocks.push(first);
+    //                 first = BasicBlock::new();
+    //             }
+    //             _ => {
+    //                 first.stmts.push(s);
+    //             }
+    //         }
             
-        }
-        // last
-        if !first.stmts.is_empty() {
-            basic_blocks.push(first);
-        }
-        println!("{:?} bb:\n{:?}", f.name, basic_blocks);
+    //     }
+    //     // last
+    //     if !first.stmts.is_empty() {
+    //         basic_blocks.push(first);
+    //     }
+    //     println!("{:?} bb:\n{:?}", f.name, basic_blocks);
 
-        // let mut next_bb = 0;
-        // for mut bb in basic_blocks {
-        //     next_bb += 1;
-        //     let stmts = bb.stmts;
-        //     for s in stmts {
-        //         match s {
-        //             IrStmt::Jmp(label)  => {
-                        
-        //             }
-        //             IrStmt::Beq(_,label) => {
-        //                 let edge = basic_blocks.get(next_bb);
-        //                 bb.edges.push(edge.unwrap());
-        //             }
-        //             // IrStmt::Ret(_) => {
+    //     for i in 0..basic_blocks.len() {
+    //         let bb = basic_blocks.get_mut(i).unwrap();
 
-        //             // }
-        //             _ => {
-        //             }
-        //         }
-        //     }
-        // }
+    //         for s in bb.stmts {
+    //             match s {
+    //                 IrStmt::Jmp(label)  => {
+    //                     bb.edges.push(bb_by_label.get(label).unwrap());
+    //                 }
+    //                 IrStmt::Beq(_,label) => {
+    //                     let edge = basic_blocks.get(i + 1).unwrap();
+    //                     bb.edges.push(edge);
+    //                     bb.edges.push(bb_by_label.get(label).unwrap());
+    //                 }
+    //                 _ => {
+    //                 }
+    //             }
+    //         }
+    //     }
+
 
         let mut stmts: Vec<IrStmt> = Vec::new();
         for s in &f.stmts {
@@ -199,27 +201,27 @@ pub fn dataflow(p: &IrProg, table: &mut SymTab) -> IrProg {
 2）跳转指令的目标指令。
 3）紧跟跳转指令之后的指令。
 */
-#[derive(Debug)]
-pub struct BasicBlock<'a> {
-   pub stmts: Vec<&'a IrStmt>,
-   pub edges: Vec<&'a BasicBlock<'a>>,  // from none,branch,cond branch
-   label: Option<String>,
-}
+// #[derive(Debug)]
+// pub struct BasicBlock<'a> {
+//    pub stmts: Vec<&'a IrStmt>,
+//    pub edges: Vec<&'a BasicBlock<'a>>,  // from none,branch,cond branch
+//    label: Option<String>,
+// }
 
-impl<'a> BasicBlock<'a> {
-    fn new() -> Self {
-        Self {
-            stmts: vec![],
-            edges: vec![],
-            label: None,
-        }
-    }
+// impl<'a> BasicBlock<'a> {
+//     fn new() -> Self {
+//         Self {
+//             stmts: vec![],
+//             edges: vec![],
+//             label: None,
+//         }
+//     }
 
-     fn new_with_label(label: String) -> Self {
-        Self {
-            stmts: vec![],
-            edges: vec![],
-            label: Some(label),
-        }
-    }
-}
+//      fn new_with_label(label: String) -> Self {
+//         Self {
+//             stmts: vec![],
+//             edges: vec![],
+//             label: Some(label),
+//         }
+//     }
+// }
