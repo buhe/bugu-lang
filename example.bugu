@@ -1,6 +1,7 @@
 int bugu(int x) {
    return x + 1;
 }
+int print(int a);
 int main() { 
-    return bugu(3); 
+return print(1);
 }

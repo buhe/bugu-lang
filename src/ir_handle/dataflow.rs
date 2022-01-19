@@ -188,7 +188,7 @@ pub fn dataflow(p: &IrProg, table: &mut SymTab) -> IrProg {
     
    
     IrProg {
-        funcs, global_vars: p.global_vars.to_owned()
+        funcs, global_vars: p.global_vars.to_owned(),decl_funcs: p.decl_funcs.to_owned(),
     }
 }
 /*

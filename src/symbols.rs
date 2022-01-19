@@ -65,8 +65,8 @@ impl SymTab {
       self.table.get(s).unwrap().get(name).unwrap()
     }
 
-    pub fn get_fn(&mut self, name: &String) -> &Symbol {
-        self.table.get(&vec![1]).unwrap().get(name).unwrap()
+    pub fn get_fn(&mut self, name: &String) -> Option<&Symbol> {
+        self.table.get(&vec![1]).unwrap().get(name)
     }
 }
 

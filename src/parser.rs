@@ -305,10 +305,18 @@ impl Parser {
               let params = self.expression_list();
               self.expect(TokenType::RightParen);
               let func = self.symbols.get_fn(&name);
-              Unary::Call(Call{
-                name: func.name.clone(),
-                params,
-              })
+              if func.is_none() {
+                // extenal function
+                Unary::Call(Call{
+                  name: name.clone(),
+                  params,
+                })
+              } else {
+                Unary::Call(Call{
+                  name: func.unwrap().name.clone(),
+                  params,
+                })
+              }
             }
             TokenType::LeftBrack => {
               // todo
@@ -593,13 +601,29 @@ impl Parser {
         self.expect(TokenType::LeftParen);
         let params = self.parameter_list();
         self.expect(TokenType::RightParen);
-        let body = self.compound_statement();
-        self.symbols.leave_scope();
-        Func {
-          name: ident.clone(),
-          stmt: body,
-          params,
+        let t = &self.tokens[self.pos];
+        match t.ty {
+            TokenType::LeftBrace => {
+              let body = self.compound_statement();
+              self.symbols.leave_scope();
+              Func {
+                name: ident.clone(),
+                stmt: body,
+                params,
+              }
+            }
+            TokenType::Semicolon => {
+              self.expect(TokenType::Semicolon);
+              self.symbols.leave_scope();
+              Func {
+                name: ident.clone(),
+                stmt: vec![],
+                params,
+              }
+            }
+            _ => self.bad_token("Nor func or func decl.")
         }
+        
     }
   
 

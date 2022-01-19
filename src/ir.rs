@@ -71,6 +71,7 @@ impl BranchLabel {
 pub struct IrProg {
   pub funcs: Vec<IrFunc>,
   pub global_vars: Vec<IrStmt>,
+  pub decl_funcs: Vec<IrDeclFunc>,
 }
 
 #[derive(Debug, Clone)]
@@ -78,6 +79,12 @@ pub struct IrFunc {
   pub name: String,
   pub params: Vec<IrStmt>,
   pub stmts: Vec<IrStmt>,
+}
+
+#[derive(Debug, Clone)]
+pub struct IrDeclFunc {
+  pub name: String,
+  pub params: Vec<IrStmt>,
 }
 
 #[derive(Debug, Clone)]
@@ -128,10 +135,16 @@ pub fn ast2ir(p: &Prog, s: &mut SymTab) -> IrProg {
   let mut r = VirtualRegeister::init();
   let mut tunnel = ArgTunnel::init();
   let mut funcs = vec![];
+  let mut decl_funcs = vec![];
   let mut global_vars = vec![];
   for f in &p.funcs {
-    let func = func(&mut tunnel, f, s, &mut bl, &mut r);
-    funcs.push(func);
+    if f.stmt.is_empty() {
+      let decl_func = decl_func(&mut tunnel, f, s, &mut bl);
+      decl_funcs.push(decl_func);
+    } else {
+      let func = func(&mut tunnel, f, s, &mut bl, &mut r);
+      funcs.push(func);
+    }
   }
   for g in &p.global_vars {
     if !g.indexes.is_empty() {
@@ -156,10 +169,19 @@ pub fn ast2ir(p: &Prog, s: &mut SymTab) -> IrProg {
     }
   }
   IrProg {
-    funcs, global_vars
+    funcs, global_vars, decl_funcs
   }
 }
-
+fn decl_func(tunnel: &mut ArgTunnel, f: &Func, table: &mut SymTab, bl: &mut BranchLabel) -> IrDeclFunc {
+  let mut params = Vec::new();
+  // params.push(IrStmt::Label(f.name.clone()));
+  // &f.params -> params
+  arg(tunnel, f.name.clone(), &mut params, &f.params, table, bl);
+  IrDeclFunc {
+    name: f.name.clone(),
+    params,
+  }
+}
 fn func(tunnel: &mut ArgTunnel, f: &Func, table: &mut SymTab, bl: &mut BranchLabel,r: &mut VirtualRegeister) -> IrFunc {
   let mut stmts = Vec::new();
   let mut params = Vec::new();
