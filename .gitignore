@@ -9,3 +9,4 @@ riscv-gcc/
 example.S
 example.o
 example_g.o
+h

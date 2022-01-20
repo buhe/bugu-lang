@@ -32,8 +32,8 @@ fn main() -> std::io::Result<()> {
     fs::write(&asm_file, &string)?;
     if cli.object {
         let mut r = Command::new("riscv-gcc/bin/riscv64-unknown-elf-gcc")
-            .arg("-march=rv32im")
-            .arg("-mabi=ilp32")
+            // .arg("-march=rv32im")
+            // .arg("-mabi=ilp32")
             .arg("-c")
             .arg(&asm_file)
             .arg("-o")
@@ -42,8 +42,8 @@ fn main() -> std::io::Result<()> {
         r.wait()?;
     } else {
         let mut r = Command::new("riscv-gcc/bin/riscv64-unknown-elf-gcc")
-            .arg("-march=rv32im")
-            .arg("-mabi=ilp32")
+            // .arg("-march=rv32im")
+            // .arg("-mabi=ilp32")
             .arg(&asm_file)
             .arg("-o")
             .arg(target)
