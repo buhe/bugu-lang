@@ -1,6 +1,7 @@
 test:
 	cargo run -- example.bugu
 	spike --isa=RV32G env/pk example
+	echo $?
 
 test2:
 	cargo run -- example2.bugu
@@ -22,3 +23,6 @@ link:
 
 c:
 	riscv-gcc/bin/riscv64-unknown-elf-gcc -o h env/h.c
+
+test3:
+	cargo run -- example2.bugu
