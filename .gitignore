@@ -14,3 +14,6 @@ example2.o
 all
 h.o
 call
+h2
+h2.o
+h3

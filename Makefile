@@ -32,3 +32,12 @@ read2:
 
 linkc:
 	riscv-gcc/bin/riscv64-unknown-elf-gcc -nostdlib h.o /Users/buhe/code/gitHub/buguOS/user/target/riscv64gc-unknown-none-elf/release/libuser.a -o call
+
+c2:
+	riscv-gcc/bin/riscv64-unknown-elf-gcc -o h2 env/h2.c
+
+c3:
+	riscv-gcc/bin/riscv64-unknown-elf-gcc -c -o h2.o env/h2.c
+
+linkh3:
+	riscv-gcc/bin/riscv64-unknown-elf-gcc -nostdlib h2.o /Users/buhe/code/gitHub/buguOS/user/target/riscv64gc-unknown-none-elf/release/libuser.a -o h3
