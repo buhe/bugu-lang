@@ -12,3 +12,5 @@ example_g.o
 h
 example2.o
 all
+h.o
+call

@@ -22,7 +22,13 @@ link:
 	riscv-gcc/bin/riscv64-unknown-elf-gcc -nostdlib example.o /Users/buhe/code/gitHub/buguOS/user/target/riscv64gc-unknown-none-elf/release/libuser.a -o all
 
 c:
-	riscv-gcc/bin/riscv64-unknown-elf-gcc -nostdlib -o h env/h.c
+	riscv-gcc/bin/riscv64-unknown-elf-gcc -c -o h.o env/h.c
 
 test3:
 	cargo run -- -o example.bugu
+
+read2:
+	riscv-gcc/bin/riscv64-unknown-elf-readelf -h all
+
+linkc:
+	riscv-gcc/bin/riscv64-unknown-elf-gcc -nostdlib h.o /Users/buhe/code/gitHub/buguOS/user/target/riscv64gc-unknown-none-elf/release/libuser.a -o call
