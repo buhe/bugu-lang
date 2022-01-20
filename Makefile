@@ -19,10 +19,10 @@ reado:
 	riscv-gcc/bin/riscv64-unknown-elf-readelf -a example.o
 
 link:
-	riscv-gcc/bin/riscv64-unknown-elf-gcc example.o /Users/buhe/code/gitHub/buguOS/user/target/riscv64gc-unknown-none-elf/release/libuser.a
+	riscv-gcc/bin/riscv64-unknown-elf-gcc -nostdlib example.o /Users/buhe/code/gitHub/buguOS/user/target/riscv64gc-unknown-none-elf/release/libuser.a -o all
 
 c:
-	riscv-gcc/bin/riscv64-unknown-elf-gcc -o h env/h.c
+	riscv-gcc/bin/riscv64-unknown-elf-gcc -nostdlib -o h env/h.c
 
 test3:
-	cargo run -- example2.bugu
+	cargo run -- -o example.bugu
