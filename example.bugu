@@ -1,7 +1,4 @@
-int bugu(int x) {
-   return x + 1;
-}
-int print(int a);
-int main() { 
-return print(1);
+int print(int i);
+int print2() {
+    return print(5);
 }

@@ -17,3 +17,5 @@ call
 h2
 h2.o
 h3
+h.S
+libexample.a

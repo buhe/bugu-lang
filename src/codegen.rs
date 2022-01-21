@@ -2,6 +2,8 @@ use crate::{ir::*, symbols::{SymTab}};
 use std::io::{Result, Write};
 
 pub fn write_asm(p: &IrProg ,table: &mut SymTab, w: &mut impl Write) -> Result<()> {
+  writeln!(w, ".attribute unaligned_access, 0")?;
+  writeln!(w, ".attribute stack_align, 16")?;
   for g in &p.global_vars {
     
     match g {
@@ -28,22 +30,22 @@ pub fn write_asm(p: &IrProg ,table: &mut SymTab, w: &mut impl Write) -> Result<(
   for f in &p.funcs {
     let mut alloc_size = 0;
     writeln!(w, ".text")?;
-    writeln!(w, ".align	2")?;
+    writeln!(w, ".align	1")?;
     writeln!(w, ".global {}", f.name)?;
     writeln!(w, "{}:", f.name)?;
-    writeln!(w, "  addi sp, sp, -56")?;
-    writeln!(w, "  sw s0, 0(sp)")?;
-    writeln!(w, "  sw s1, 4(sp)")?;
-    writeln!(w, "  sw s2, 8(sp)")?;
-    writeln!(w, "  sw s3, 12(sp)")?;
-    writeln!(w, "  sw s4, 16(sp)")?;
-    writeln!(w, "  sw s5, 20(sp)")?;
-    writeln!(w, "  sw s6, 24(sp)")?;
-    writeln!(w, "  sw s7, 28(sp)")?;
-    writeln!(w, "  sw s8, 32(sp)")?;
-    writeln!(w, "  sw s9, 36(sp)")?;
-    writeln!(w, "  sw s10, 40(sp)")?;
-    writeln!(w, "  sw s11, 44(sp)")?;
+    writeln!(w, "  addi sp, sp, -88")?;
+    writeln!(w, "  sd s0, 0(sp)")?;
+    writeln!(w, "  sd s1, 8(sp)")?;
+    writeln!(w, "  sd s2, 16(sp)")?;
+    writeln!(w, "  sd s3, 24(sp)")?;
+    writeln!(w, "  sd s4, 32(sp)")?;
+    writeln!(w, "  sd s5, 40(sp)")?;
+    writeln!(w, "  sd s6, 48(sp)")?;
+    writeln!(w, "  sd s7, 56(sp)")?;
+    writeln!(w, "  sd s8, 64(sp)")?;
+    writeln!(w, "  sd s9, 72(sp)")?;
+    writeln!(w, "  sd s10, 80(sp)")?;
+    writeln!(w, "  sd s11, 88(sp)")?;
     for s in &f.stmts {
       match s {
         IrStmt::Neg(t1, t2) => {
@@ -55,19 +57,19 @@ pub fn write_asm(p: &IrProg ,table: &mut SymTab, w: &mut impl Write) -> Result<(
         IrStmt::Ret(t) => {
           writeln!(w, "  mv a0, {}", t)?; // a0 is return value
 
-          writeln!(w, "  lw s0, 0(sp)")?;
-          writeln!(w, "  lw s1, 4(sp)")?;
-          writeln!(w, "  lw s2, 8(sp)")?;
-          writeln!(w, "  lw s3, 12(sp)")?;
-          writeln!(w, "  lw s4, 16(sp)")?;
-          writeln!(w, "  lw s5, 20(sp)")?;
-          writeln!(w, "  lw s6, 24(sp)")?;
-          writeln!(w, "  lw s7, 28(sp)")?;
-          writeln!(w, "  lw s8, 32(sp)")?;
-          writeln!(w, "  lw s9, 36(sp)")?;
-          writeln!(w, "  lw s10, 40(sp)")?;
-          writeln!(w, "  lw s11, 44(sp)")?;
-          writeln!(w, "  addi sp, sp, {}", alloc_size + 56)?;
+          writeln!(w, "  ld s0, 0(sp)")?;
+          writeln!(w, "  ld s1, 8(sp)")?;
+          writeln!(w, "  ld s2, 16(sp)")?;
+          writeln!(w, "  ld s3, 24(sp)")?;
+          writeln!(w, "  ld s4, 32(sp)")?;
+          writeln!(w, "  ld s5, 40(sp)")?;
+          writeln!(w, "  ld s6, 48(sp)")?;
+          writeln!(w, "  ld s7, 56(sp)")?;
+          writeln!(w, "  ld s8, 64(sp)")?;
+          writeln!(w, "  ld s9, 72(sp)")?;
+          writeln!(w, "  ld s10, 80(sp)")?;
+          writeln!(w, "  ld s11, 88(sp)")?;
+          writeln!(w, "  addi sp, sp, {}", alloc_size + 88)?;
 
           writeln!(w, "  ret")?;
         }
@@ -159,23 +161,23 @@ pub fn write_asm(p: &IrProg ,table: &mut SymTab, w: &mut impl Write) -> Result<(
           // mv t a
           // jmp label
           
-          writeln!(w, "  addi sp, sp, -60")?;
-          writeln!(w, "  sw ra, 0(sp)")?;
-          writeln!(w, "  sw t0, 4(sp)")?;
-          writeln!(w, "  sw t1, 8(sp)")?;
-          writeln!(w, "  sw t2, 12(sp)")?;
-          writeln!(w, "  sw t3, 16(sp)")?;
-          writeln!(w, "  sw t4, 20(sp)")?;
-          writeln!(w, "  sw t5, 24(sp)")?;
-          writeln!(w, "  sw t6, 28(sp)")?;
-          writeln!(w, "  sw a0, 32(sp)")?;
-          writeln!(w, "  sw a1, 36(sp)")?;
-          writeln!(w, "  sw a2, 40(sp)")?;
-          writeln!(w, "  sw a3, 44(sp)")?;
-          writeln!(w, "  sw a4, 48(sp)")?;
-          writeln!(w, "  sw a5, 52(sp)")?;
-          writeln!(w, "  sw a6, 56(sp)")?;
-          writeln!(w, "  sw a7, 60(sp)")?;
+          writeln!(w, "  addi sp, sp, -120")?;
+          writeln!(w, "  sd ra, 0(sp)")?;
+          writeln!(w, "  sd t0, 8(sp)")?;
+          writeln!(w, "  sd t1, 16(sp)")?;
+          writeln!(w, "  sd t2, 24(sp)")?;
+          writeln!(w, "  sd t3, 32(sp)")?;
+          writeln!(w, "  sd t4, 40(sp)")?;
+          writeln!(w, "  sd t5, 48(sp)")?;
+          writeln!(w, "  sd t6, 56(sp)")?;
+          writeln!(w, "  sd a0, 64(sp)")?;
+          writeln!(w, "  sd a1, 72(sp)")?;
+          writeln!(w, "  sd a2, 80(sp)")?;
+          writeln!(w, "  sd a3, 88(sp)")?;
+          writeln!(w, "  sd a4, 96(sp)")?;
+          writeln!(w, "  sd a5, 104(sp)")?;
+          writeln!(w, "  sd a6, 112(sp)")?;
+          writeln!(w, "  sd a7, 120(sp)")?;
           // args
           for pair in regs {
             writeln!(w, "  mv {} ,{}", pair.1, pair.0)?;
@@ -183,32 +185,32 @@ pub fn write_asm(p: &IrProg ,table: &mut SymTab, w: &mut impl Write) -> Result<(
           // call f
           writeln!(w, "  call {}", label)?;
           
-          writeln!(w, "  lw ra, 0(sp)")?;
-          writeln!(w, "  lw t0, 4(sp)")?;
-          writeln!(w, "  lw t1, 8(sp)")?;
-          writeln!(w, "  lw t2, 12(sp)")?;
-          writeln!(w, "  lw t3, 16(sp)")?;
-          writeln!(w, "  lw t4, 20(sp)")?;
-          writeln!(w, "  lw t5, 24(sp)")?;
-          writeln!(w, "  lw t6, 28(sp)")?;
+          writeln!(w, "  ld ra, 0(sp)")?;
+          writeln!(w, "  ld t0, 8(sp)")?;
+          writeln!(w, "  ld t1, 16(sp)")?;
+          writeln!(w, "  ld t2, 24(sp)")?;
+          writeln!(w, "  ld t3, 32(sp)")?;
+          writeln!(w, "  ld t4, 40(sp)")?;
+          writeln!(w, "  ld t5, 48(sp)")?;
+          writeln!(w, "  ld t6, 56(sp)")?;
           
-          writeln!(w, "  lw a1, 36(sp)")?;
-          writeln!(w, "  lw a2, 40(sp)")?;
-          writeln!(w, "  lw a3, 44(sp)")?;
-          writeln!(w, "  lw a4, 48(sp)")?;
-          writeln!(w, "  lw a5, 52(sp)")?;
-          writeln!(w, "  lw a6, 56(sp)")?;
-          writeln!(w, "  lw a7, 60(sp)")?;
-          writeln!(w, "  addi sp, sp, 60")?;
+          writeln!(w, "  ld a1, 72(sp)")?;
+          writeln!(w, "  ld a2, 80(sp)")?;
+          writeln!(w, "  ld a3, 88(sp)")?;
+          writeln!(w, "  ld a4, 96(sp)")?;
+          writeln!(w, "  ld a5, 104(sp)")?;
+          writeln!(w, "  ld a6, 112(sp)")?;
+          writeln!(w, "  ld a7, 120(sp)")?;
+          writeln!(w, "  addi sp, sp, 120")?;
 
           // return
           // tx = a0
           writeln!(w, "  mv {} ,a0", r)?;
 
-          writeln!(w, "  lw a0, 32(sp)")?;
+          writeln!(w, "  ld a0, 64(sp)")?;
         },
         IrStmt::Load(_,_,reg, base, offset) => {
-          writeln!(w, "  lw {}, {}({})", reg, offset, base)?;
+          writeln!(w, "  ld {}, {}({})", reg, offset, base)?;
         }
         IrStmt::LoadSymbol(reg,vn) => {
           writeln!(w, "  la {}, {}", reg, vn)?;

@@ -16,7 +16,7 @@ obj:
 	riscv-gcc/bin/riscv64-unknown-elf-gcc -march=rv32im -mabi=ilp32 -c example.S -o example_g.o
 
 reado:
-	riscv-gcc/bin/riscv64-unknown-elf-readelf -a example.o
+	riscv-gcc/bin/riscv64-unknown-elf-readelf -a h.o
 
 link:
 	riscv-gcc/bin/riscv64-unknown-elf-gcc -nostdlib example.o /Users/buhe/code/gitHub/buguOS/user/target/riscv64gc-unknown-none-elf/release/libuser.a -o all
@@ -28,7 +28,7 @@ test3:
 	cargo run -- -o example.bugu
 
 read2:
-	riscv-gcc/bin/riscv64-unknown-elf-readelf -h all
+	riscv-gcc/bin/riscv64-unknown-elf-readelf -a example.o
 
 linkc:
 	riscv-gcc/bin/riscv64-unknown-elf-gcc -nostdlib h.o /Users/buhe/code/gitHub/buguOS/user/target/riscv64gc-unknown-none-elf/release/libuser.a -o call
@@ -41,3 +41,10 @@ c3:
 
 linkh3:
 	riscv-gcc/bin/riscv64-unknown-elf-gcc -nostdlib h2.o /Users/buhe/code/gitHub/buguOS/user/target/riscv64gc-unknown-none-elf/release/libuser.a -o h3
+
+ar:
+	cargo run -- -o example.bugu
+	riscv64-unknown-elf-ar rcs libexample.a example.o
+
+c2s:
+	riscv64-unknown-elf-gcc -S env/h.c -o h.S
