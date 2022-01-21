@@ -1,4 +1,4 @@
 int print(int i);
 int print2() {
-    return print(5);
+    return print(15);
 }

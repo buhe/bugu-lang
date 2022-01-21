@@ -1,4 +1,8 @@
-int main() { 
-    int x = 6; 
-    return x;
+int print(int i);
+int print2() {
+    if (1) {
+        return print(10);
+    } else {
+        return print(15);
+    }  
 }
