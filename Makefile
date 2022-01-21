@@ -52,3 +52,7 @@ c2s:
 ar2:
 	cargo run -- -o example2.bugu
 	riscv64-unknown-elf-ar rcs libexample2.a example2.o
+
+ar3:
+	cargo run -- -o example3.bugu
+	riscv64-unknown-elf-ar rcs libexample3.a example3.o

@@ -1,0 +1,4 @@
+int print(int i);
+int main() {
+    return print(15);
+}

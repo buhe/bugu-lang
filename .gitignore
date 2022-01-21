@@ -19,3 +19,5 @@ h2.o
 h3
 h.S
 libexample.a
+example3.o
+libexample3.a
