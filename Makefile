@@ -48,3 +48,7 @@ ar:
 
 c2s:
 	riscv64-unknown-elf-gcc -S env/h.c -o h.S
+
+ar2:
+	cargo run -- -o example2.bugu
+	riscv64-unknown-elf-ar rcs libexample2.a example2.o
